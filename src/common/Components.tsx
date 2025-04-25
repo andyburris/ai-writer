@@ -37,7 +37,7 @@ const customButtonProps = ({ kind = "ghost", size = "md", decoration = true, }) 
     size === "sm" ? "px-2 py-2 min-w-8 min-h-8" + (decoration ? " rounded-md" : "")
     : size === "md" ? "px-2 py-2 min-w-10 min-h-10"  + (decoration ? " rounded-lg" : "")
     : "px-4 py-3 min-w-12 min-h-12" + (decoration ? " rounded-2xl" : "")
-  const focusClasses = `focus:outline-none focus-visible:ring-2 focus-visible:ring-opacity-50 ring-offset-2 disabled:opacity-50`
+  const focusClasses = `focus:outline-hidden focus-visible:ring-2 focus-visible:ring-opacity-50 ring-offset-2 disabled:opacity-50`
   const baseClasses = `${sizeClasses} ${focusClasses} w-fit gap-2 flex items-center justify-center font-semibold`
   switch (kind) {
     case "primary":
