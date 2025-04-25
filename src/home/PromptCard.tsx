@@ -1,35 +1,60 @@
-import { ArrowsClockwise } from "@phosphor-icons/react";
+import { ArrowsClockwise, Check, PencilLine, PencilSimpleLine } from "@phosphor-icons/react";
 import { Button } from "../common/Components";
 import { Document } from "../schema/document";
 import { getEssayPrompt } from "../ai/ai-prompt";
+import { useState } from "react";
+import { Input, TextArea, TextField } from "react-aria-components";
 
 
 export function PromptCard({ document }: { document: Document }) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [isLoading, setIsLoading] = useState<Date | undefined>(undefined);
+    
     return (
-        <div className="flex flex-col items-start bg-stone-200 border border-stone-300 rounded-3xl py-1 pr-2">
+        <div className="flex flex-col items-stretch bg-stone-200 border border-stone-300 rounded-2xl py-1 pr-2">
             <div className="flex items-center pl-4 w-full justify-between">
                 <p className="font-semibold text-stone-500">Prompt</p>
-                <Button
-                    className="hover:bg-stone-300"
-                    onPress={async () => {
-                        const lastLoaded = new Date(document.prompt?.slice("LOADING".length) ?? "0").getTime()
-                        if(lastLoaded > 0 && (Date.now() - lastLoaded) < 10000) return
-
-                        document.prompt = "LOADING" + new Date().toISOString()
-                        const prompt = await getEssayPrompt({ provider: "ollama", model: "gemma3" })
-                        console.log("got prompt", prompt)
-                        document.prompt = prompt
-                    }}
+                <div className="flex items-center">
+                    <Button
+                        className="hover:bg-stone-300"
+                        onPress={() => setIsEditing(!isEditing)}
+                    >
+                        {isEditing ? <Check/> : <PencilSimpleLine/> }
+                    </Button>
+                    <Button
+                        className="hover:bg-stone-300"
+                        isDisabled={(isLoading && isLoading.getTime() > Date.now() - 1000) || isEditing}
+                        onPress={async () => {
+                            setIsLoading(new Date())
+                            const prompt = await getEssayPrompt({ provider: "ollama", model: "gemma3" })
+                            console.log("got prompt", prompt)
+                            document.prompt = prompt
+                            setIsLoading(undefined)
+                        }}
+                    >
+                        <ArrowsClockwise />
+                    </Button>
+                </div>
+            </div>
+            { isEditing 
+                ? <TextField
+                    value={document.prompt}
+                    onChange={(value) => document.prompt = value}
+                    className={"ml-2 mb-1 -mt-1 bg-stone-300 rounded-xl placeholder:text-stone-400"}
+                    onFocus={(e) => e.target.setSelectionRange(0, e.target.value.length)}
+                    autoFocus
                 >
-                    <ArrowsClockwise />
-                </Button>
-            </div>
-            <div className={document.prompt ? "px-4 pb-2" : ""}>
-                { document.prompt?.startsWith("LOADING") ? <div className="h-4 w-20 rounded-full bg-stone-300"/>
-                : !document.prompt ? null
-                : <p className="">{document.prompt}</p>
-                }
-            </div>
+                    <TextArea
+                        className={"w-full -mb-1.5 focus:outline-none px-2 py-1 field-sizing-content"}
+                    />
+                </TextField>
+                : <div className={"px-4 pb-2"}>
+                    { isLoading ? <div className="h-4 w-20 rounded-full bg-stone-300"/>
+                    : !document.prompt ? <p className="text-stone-400">None</p>
+                    : <p className="">{document.prompt}</p>
+                    }
+                </div>
+            }
         </div>
     );
 

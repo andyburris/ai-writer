@@ -35,7 +35,7 @@ export class JazzAccount extends Account {
     if (this.root === undefined) {
       const group = Group.create();
 
-      const initialDocument = Document.create({ title: "Document", content: CoRichText.create("", { owner: group }) })
+      const initialDocument = Document.create({ title: "Document", prompt: "", content: CoRichText.create("", { owner: group }) })
       this.root = AccountRoot.create(
         {
           documents: DocumentList.create([initialDocument], group),

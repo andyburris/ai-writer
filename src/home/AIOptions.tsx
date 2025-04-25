@@ -16,17 +16,15 @@ export function AIOptionsCard({ options, className }: { options: AIOptions, clas
             <div className="w-full grow overflow-y-scroll">
                 <OptionsSection title="Model Settings">
                     <div className="flex flex-col gap-2">
-                        <Switch
+                        <SwitchWithLabel
                             isSelected={loadedOptions.modelSettings.source === "ollama"}
                             onChange={async (isSelected) => {
                                 loadedOptions.modelSettings.source = isSelected ? "ollama" : "openai"
                             }}
+                            className={"w-full"}
+                            label="Use local model (Ollama)"
                         >
-                                <div className="flex h-[26px] w-[44px] shrink-0 cursor-default rounded-full shadow-inner bg-clip-padding border border-solid border-white/30 p-[3px] box-border transition duration-200 ease-in-out bg-stone-100 group-pressed:bg-stone-700 group-selected:bg-stone-800 group-selected:group-pressed:bg-stone-900 outline-hidden group-focus-visible:ring-2 ring-black">
-                                    <span className="h-[18px] w-[18px] transform rounded-full bg-white shadow-xs transition duration-200 ease-in-out translate-x-0 group-selected:translate-x-[100%]" />
-                                </div>
-                                Use local model with Ollama
-                        </Switch>
+                        </SwitchWithLabel>
                     </div>
                 </OptionsSection>
             </div>
@@ -40,5 +38,16 @@ function OptionsSection({ title, children }: { title: string, children: React.Re
             <p className="font-semibold text-stone-500">{title}</p>
             {children}
         </div>
+    )
+}
+
+function SwitchWithLabel({ label, ...props }: { label: string } & React.ComponentProps<typeof Switch>) {
+    return (
+        <Switch {...props} className={`group flex items-center gap-3 justify-between ${props.className}`}>
+            {label}
+            <div className="flex h-[26px] w-[44px] shrink-0 cursor-default rounded-full shadow-inner bg-clip-padding border border-solid border-white/30 p-[3px] box-border transition duration-200 ease-in-out bg-stone-100 group-pressed:bg-stone-700 group-selected:bg-stone-800 group-selected:group-pressed:bg-stone-900 outline-hidden group-focus-visible:ring-2 ring-black">
+                <span className="h-[18px] w-[18px] transform rounded-full bg-white shadow-xs transition duration-200 ease-in-out translate-x-0 group-selected:translate-x-[100%]" />
+            </div>
+        </Switch>
     )
 }
