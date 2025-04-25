@@ -1,67 +1,23 @@
 import { useAccount, useIsAuthenticated } from "jazz-react";
-import { AuthButton } from "./AuthButton.tsx";
-import { Form } from "./Form.tsx";
-import { Logo } from "./Logo.tsx";
+import { Editor } from "./editor/Editor";
+import { Button } from "./common/Components";
+import { ArrowsClockwise } from "@phosphor-icons/react";
+import { PromptCard } from "./home/PromptCard";
+import { AIOptionsCard } from "./home/AIOptions";
 
 function App() {
-  const { me } = useAccount({ resolve: { profile: true, root: true } });
-
-  const isAuthenticated = useIsAuthenticated();
+  const { me } = useAccount({ resolve: { profile: true, root: { documents: { $each: true }, aiOptions: true } } });
 
   return (
     <>
-      <header>
-        <nav className="container flex justify-between items-center py-3">
-          {isAuthenticated ? (
-            <span>You're logged in.</span>
-          ) : (
-            <span>Authenticate to share the data with another device.</span>
-          )}
-          <AuthButton />
-        </nav>
-      </header>
-      <main className="container mt-16 flex flex-col gap-8">
-        <Logo />
-
-        <div className="text-center">
-          <h1>
-            Welcome{me?.profile.firstName ? <>, {me?.profile.firstName}</> : ""}
-            !
-          </h1>
-          {!!me?.root.age && (
-            <p>As of today, you are {me.root.age} years old.</p>
-          )}
+      <main className="flex w-screen h-screen p-4 pb-0 gap-4 bg-stone-100">
+        <div className="w-full h-full rounded-t-3xl bg-white shadow-outset overflow-hidden">
+          { me && <Editor document={me.root.documents[0]} className="w-full h-full p-4 focus:outline-none overflow-y-scroll" containerClassName="w-full h-full"/> }
         </div>
-
-        <Form />
-
-        <p className="text-center">
-          Edit the form above,{" "}
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="font-semibold underline"
-          >
-            refresh
-          </button>{" "}
-          this page, and see your changes persist.
-        </p>
-
-        <p className="text-center">
-          Edit <code className="font-semibold">schema.ts</code> to add more
-          fields.
-        </p>
-
-        <p className="text-center my-16">
-          Go to{" "}
-          <a
-            className="font-semibold underline"
-            href="https://jazz.tools/docs/react/guide"
-          >
-            jazz.tools/docs/react/guide
-          </a>{" "}
-          for a full tutorial.
-        </p>
+        <div className="flex flex-col gap-2 w-96">
+          { me && <PromptCard document={me.root.documents[0]} /> }
+          { me && <AIOptionsCard options={me.root.aiOptions} className="flex flex-col h-full rounded-t-3xl bg-white shadow-outset w-full"/> }
+        </div>
       </main>
     </>
   );
