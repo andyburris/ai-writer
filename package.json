@@ -18,6 +18,7 @@
     "@tiptap/pm": "^2.11.7",
     "@tiptap/react": "^2.11.7",
     "@tiptap/starter-kit": "^2.11.7",
+    "jazz-inspector": "^0.13.13",
     "jazz-react": "^0.13.13",
     "jazz-richtext-prosemirror": "^0.1.2",
     "jazz-tools": "^0.13.13",

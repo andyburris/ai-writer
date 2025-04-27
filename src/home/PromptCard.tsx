@@ -1,12 +1,14 @@
 import { ArrowsClockwise, Check, PencilLine, PencilSimpleLine } from "@phosphor-icons/react";
-import { Button } from "../common/Components";
+import { Button, TextAreaField } from "../common/Components";
 import { Document } from "../schema/document";
 import { getEssayPrompt } from "../ai/ai-prompt";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Input, TextArea, TextField } from "react-aria-components";
+import { ModelSettingsContext } from "../App";
 
 
 export function PromptCard({ document }: { document: Document }) {
+    const modelSettings = useContext(ModelSettingsContext)
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState<Date | undefined>(undefined);
     
@@ -26,7 +28,7 @@ export function PromptCard({ document }: { document: Document }) {
                         isDisabled={(isLoading && isLoading.getTime() > Date.now() - 1000) || isEditing}
                         onPress={async () => {
                             setIsLoading(new Date())
-                            const prompt = await getEssayPrompt({ provider: "ollama", model: "gemma3" })
+                            const prompt = await getEssayPrompt(modelSettings!)
                             console.log("got prompt", prompt)
                             document.prompt = prompt
                             setIsLoading(undefined)
@@ -37,17 +39,14 @@ export function PromptCard({ document }: { document: Document }) {
                 </div>
             </div>
             { isEditing 
-                ? <TextField
+                ? <TextAreaField
                     value={document.prompt}
                     onChange={(value) => document.prompt = value}
                     className={"ml-2 mb-1 -mt-1 bg-stone-300 rounded-xl placeholder:text-stone-400"}
                     onFocus={(e) => e.target.setSelectionRange(0, e.target.value.length)}
                     autoFocus
-                >
-                    <TextArea
-                        className={"w-full -mb-1.5 focus:outline-none px-2 py-1 field-sizing-content"}
-                    />
-                </TextField>
+                    aria-label="Edit prompt"
+                />
                 : <div className={"px-4 pb-2"}>
                     { isLoading ? <div className="h-4 w-20 rounded-full bg-stone-300"/>
                     : !document.prompt ? <p className="text-stone-400">None</p>

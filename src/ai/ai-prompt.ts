@@ -1,16 +1,11 @@
 import { schema } from "@tiptap/pm/schema-basic";
+import { Resolved } from "jazz-tools";
+import { AIModelSettings } from "../schema/schema";
 
-type AIProvider = "openai" | "ollama";
-
-interface PromptOptions {
-  provider: AIProvider;
-  model?: string;
-  apiKey?: string; // Only required for OpenAI
-}
 
 let cachedPrompts: string[] | null = null;
 
-export async function getEssayPrompt(opts: PromptOptions): Promise<string> {
+export async function getEssayPrompt(opts: Resolved<AIModelSettings, {}>): Promise<string> {
   if (cachedPrompts?.length) {
     const index = Math.floor(Math.random() * cachedPrompts.length);
     return cachedPrompts.splice(index, 1)[0]; // Remove to avoid duplicates
@@ -21,7 +16,7 @@ export async function getEssayPrompt(opts: PromptOptions): Promise<string> {
   return getEssayPrompt(opts); // Recursively fetch the first prompt
 }
 
-async function fetchPromptList(opts: PromptOptions): Promise<string> {
+async function fetchPromptList(opts: Resolved<AIModelSettings, {}>): Promise<string> {
   const generationPrompt = `You are an assistant that generates a list of unique and thought-provoking essay prompts.
 
 Requirements:
@@ -37,7 +32,7 @@ Output exactly 10 prompts in a pure JSON array of strings. Example format:
   ...
 ]`;
 
-  if (opts.provider === "openai") {
+  if (opts.source === "openai") {
     if (!opts.apiKey) throw new Error("OpenAI API key is required");
 
     const model = opts.model ?? "gpt-4-turbo";
@@ -62,7 +57,7 @@ Output exactly 10 prompts in a pure JSON array of strings. Example format:
     return data.choices?.[0]?.message?.content ?? "";
   }
 
-  if (opts.provider === "ollama") {
+  if (opts.source === "ollama") {
     const model = opts.model ?? "llama3";
 
     const schema = {
