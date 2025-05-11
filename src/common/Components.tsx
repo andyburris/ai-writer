@@ -3,6 +3,7 @@ import { Button as AriaButton, ButtonProps, TextArea, TextField, TextFieldProps 
 import { LinkProps, Link as ReactLink } from "react-router"
 import { Switch as AriaSwitch, SwitchProps } from "react-aria-components"
 import { AriaTextFieldProps, useTextField } from 'react-aria';
+import { twMerge } from "tailwind-merge";
 
 type WrappableComponent<P = {}> = React.ComponentType<P & { className?: string }>
 
@@ -61,10 +62,14 @@ export const Button = withTailwindClasses<ButtonProps, CustomButtonProps>(AriaBu
 type AllLinkProps = LinkProps & { children?: React.ReactNode;} & React.RefAttributes<HTMLAnchorElement>
 export const Link = withTailwindClasses<AllLinkProps, CustomButtonProps>(ReactLink, customButtonProps)
 
-export function TextAreaField({ className, ...props }: { className?: string } & TextFieldProps & React.RefAttributes<HTMLDivElement>) {
+export function TextAreaField({ className, kind, ...props }: { className?: string, kind?: "background" } & TextFieldProps & React.RefAttributes<HTMLDivElement>) {
+  const baseClasses = 
+    kind === undefined ? ""
+    : kind === "background" ? "rounded-xl bg-stone-100 placeholder:text-stone-200"
+    : ""
   return (
     <TextField
-      className={className}
+      className={twMerge(baseClasses, className)}
       {...props}
     >
       <TextArea

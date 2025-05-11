@@ -1,5 +1,20 @@
 /****** CUSTOM *******/
 
+export function createJazzPluginSafe(coRichText: CoRichText, config: JazzPluginConfig = {}) {
+  const plugin = createJazzPlugin(coRichText, config);
+
+  // Replace the broken `state.init()` with a no-op
+  const patchedPlugin = new Plugin({
+    ...plugin.spec,
+    state: {
+      init: () => ({ coRichText }),
+      apply: plugin.spec.state!.apply ?? ((tr, val) => val),
+    },
+  });
+
+  return patchedPlugin;
+}
+
 import {
     DOMOutputSpec,
     MarkSpec,
@@ -8,7 +23,8 @@ import {
     Node as PMNode,
     Schema,
 } from "prosemirror-model";
-import { nodes, marks } from "prosemirror-schema-basic";
+import { nodes as basicNodes, marks as basicMarks } from "prosemirror-schema-basic";
+import { orderedList, bulletList, listItem } from "prosemirror-schema-list";
 
 export function htmlToProseMirror(content: string) {
     const doc = new DOMParser().parseFromString(content, "text/html");
@@ -24,11 +40,17 @@ export function proseMirrorToHtml(doc: PMNode) {
 }
 
 const extendedSchema: Schema<
-    "blockquote" | "image" | "text" | "doc" | "paragraph" | "horizontal_rule" | "heading" | "code_block" | "hard_break", 
+    "blockquote" | "image" | "text" | "doc" | "paragraph" | "horizontalRule" | "heading" | "codeBlock" | "hardBreak", // | "bulletList" | "orderedList" | "listItem", 
     "link" | "code" | "em" | "strong" | "comment"
 > = new Schema({
     nodes: {
-        ...nodes,
+        ...basicNodes,
+        horizontalRule: basicNodes.horizontal_rule,
+        codeBlock: basicNodes.code_block,
+        hardBreak: basicNodes.hard_break,
+        // listItem: listItem,
+        // bulletList: bulletList,
+        // orderedList: orderedList,
         paragraph: {
             attrs: {
                 dataId: { default: null, validate: "string|null" },
@@ -44,7 +66,7 @@ const extendedSchema: Schema<
         },
     },
     marks: {
-        ...marks,
+        ...basicMarks,
         comment: {
             attrs: {
                 commentId: { validate: "string" },

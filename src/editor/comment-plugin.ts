@@ -1,5 +1,6 @@
 import { Mark, mergeAttributes, Range } from "@tiptap/core";
 import { Mark as PMMark } from "@tiptap/pm/model";
+import { TextSelection } from "@tiptap/pm/state";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -7,7 +8,7 @@ declare module "@tiptap/core" {
       /**
        * Set a comment (add)
        */
-      setComment: (commentId: string) => ReturnType;
+      setComment: (commentId: string, commentRange?: TextSelection) => ReturnType;
       /**
        * Unset a comment (remove)
        */
@@ -54,7 +55,7 @@ export const CommentExtension = Mark.create<CommentOptions, CommentStorage>({
   parseHTML() {
     return [
       {
-        tag: "span[data-comment-id]",
+        tag: "comment[data-comment-id]",
         getAttrs: (el) =>
           !!(el as HTMLSpanElement).getAttribute("data-comment-id")?.trim() &&
           null,
@@ -64,7 +65,7 @@ export const CommentExtension = Mark.create<CommentOptions, CommentStorage>({
 
   renderHTML({ HTMLAttributes }) {
     return [
-      "span",
+      "comment",
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes),
       0,
     ];
@@ -99,10 +100,17 @@ export const CommentExtension = Mark.create<CommentOptions, CommentStorage>({
   addCommands() {
     return {
       setComment:
-        (commentId) =>
-        ({ commands }) => {
+        (commentId, commentRange) =>
+        ({ commands, dispatch, tr }) => {
           if (!commentId) return false;
-          return commands.setMark("comment", { commentId });
+          // use current selection if no range is provided
+          if(!commentRange) return commands.setMark("comment", { commentId });
+          // use the provided range
+          const from = commentRange.$from.pos;
+          const to = commentRange.$to.pos;
+          const commentMark = this.editor.schema.marks.comment.create({commentId});
+          const trWithComment = tr.addMark(from, to, commentMark);
+          return dispatch?.(trWithComment);
         },
       unsetComment:
         (commentId) =>

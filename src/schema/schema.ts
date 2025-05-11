@@ -4,7 +4,7 @@
  */
 
 import { Account, CoMap, CoPlainText, CoRichText, Group, Profile, co } from "jazz-tools";
-import { Document, DocumentList } from "./document";
+import { Comment, Document, DocumentList, DumpOutline } from "./document";
 
 export class JazzProfile extends Profile {
 }
@@ -35,7 +35,16 @@ export class JazzAccount extends Account {
     if (this.root === undefined) {
       const group = Group.create();
 
-      const initialDocument = Document.create({ title: "Document", prompt: "", content: CoRichText.create("", { owner: group }) })
+      const initialDocument = Document.create({ 
+        title: "Document", 
+        prompt: "", 
+        content: CoRichText.create("", { owner: group }),
+        comments: CoMap.Record(co.ref(Comment)).create({}, { owner: group }),
+        dumpOutline: DumpOutline.create({
+          dump: "",
+          outline: "",
+        }, group),
+      })
       this.root = AccountRoot.create(
         {
           documents: DocumentList.create([initialDocument], group),
